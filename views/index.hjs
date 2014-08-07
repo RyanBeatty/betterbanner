@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+	<title>BetterBanner</title>
+	<link rel="stylesheet" href="./stylesheets/landingstyle.css" type="text/css" />
+	<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />	
+	<meta property="og:image" content="http://www.betterbannerwm.com/img/fbshare.png"/>
+	<!--<link rel="shortcut icon" type="image/x-png" href="graphics/favicon.png"/> 
+	<link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+	<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+	<link rel="shortcut icon" type="image/x-png" href="img/logowhitefavicon.png"/>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script> -->
+
+</head>
+<!--
+So we will have an animated background with 5 clouds moving across the screen.
+Steps: 
+1. create the clouds
+2. Animate them to move across the screen
+3. Stylize the clouds(can be done as step #2 also)
+-->
+
+<body>
+
+
+<div id="wrapper">
+	<img class="logo" style="width:600px;"src="./images/Logo.png" />
+
+	<a href="/search" class="start_button">Get Started</a>
+
+	<div class="cloud x1"></div>
+	<!-- Time for multiple clouds to dance around -->
+	<div class="cloud x2"></div>
+	<div class="cloud x3"></div>
+	<div class="cloud x4"></div>
+	<div class="cloud x5"></div>
+
+	<a href='http://www.facebook.com/share.php?u=http://www.betterbannerwm.com'>
+	<img class = "fbGreen" style="width:100px;" alt='Facebook'src='/images/fblogo.png'/></a>
+
+	<a href='http://www.facebook.com/share.php?u=http://www.betterbannerwm.com'>
+	<img class = "fbWhite" style="width:100px;" alt='Facebook'src='/images/fblogowhite.png'/></a> 
+	</div>
+</div>
+
+
+
+
+</body>
+</html>

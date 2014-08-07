@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+	<head>					
+		<title>BetterBanner</title>
+		<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+		<link rel="stylesheet" type="text/css" href="./stylesheets/style.css" />
+		<link rel="stylesheet" href="./stylesheets/slidebars.min.css">
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+		<!--<script src="./javascripts/slidebars.min.js"></script>-->
+		<script src="./javascripts/slidebars.min.js"></script>
+		<script type="text/javascript">
+			var table;
+			var course_colors = ['#99E3FF', '#758cff', '#c8ff8d', '#ff9e57'];
+			var color_index = 0;
+			var courses = [];
+			var slidebar_expanded = false;
+
+			function getDescription(index)
+			{
+				//window.alert(table[index]["ATTRIBUTE"]);
+				console.log('got description');
+				var payload = {attribute: table[index]["ATTRIBUTE"], index: index};
+				//document.getElementById(index + 'descrip')  == $("#"+index+descrip).html("444");
+				var element = document.getElementById(index + 'descrip');
+				
+				if(element)
+				{
+					element.html = "";
+					element.outerHTML = "";
+				}
+				else
+				{
+
+					$.ajax({
+							url:"/courseinfo",
+							type: "GET",
+							data: payload,
+							dataType: "json",
+							success: function (data){
+								var line_class;
+								if(index%2 == 0)
+									line_class = "line1";
+								else
+									line_class = "line2";
+
+								//$("#" + index ).closest( "tr" ).after('<tr id="'+ i + '" class="'+line_class+'"><td>' + data[0]['INFO'] + '</td></tr>');
+								// $('<tr id="'+ index + 'descrip" class="'+line_class+'"><td colspan="11" class="descrip">' + data[0]['INFO'] + '</td></tr>').insertAfter($("#" + index ).closest( "tr" ));
+
+								$('<tr id="'+ index + 'descrip" class="'+line_class+'"><td colspan="11" class="descrip">' + data[0]['INFO'] + '</td></tr>').insertAfter($("#" + index ).closest( "tr" ));
+
+								//$('#'+index).next('.' + line_class).hide();
+								//$('#'+index).next('.slideme').slideToggle();
+								//window.alert('success: ' + data[0]['INFO']);
+							}
+					});
+				}
+			}
+
+			function addCourse(index)
+			{
+				var new_crn = table[index]['CRN'];
+				for(var k = 0; k < courses.length; ++k)
+				{	
+					if(new_crn == courses[k])
+					{
+						window.alert('Course already selected');
+						return false;
+					}
+				}
+
+				console.log('added course');
+				var dom_string = '<div class="courseRect" style="background-color: ' + course_colors[color_index++] + '"> ' + new_crn + ' - ' + table[index]['ATTRIBUTE'] + '<br> <strong>' + table[index]['TITLE'] + '</strong><br>' + table[index]['INSTRUCTOR'] + '<br>' + table[index]['DAYS'] + ' ' + table[index]['TIMES'] + ' </div>';
+
+				if(color_index > 3)
+					color_index = 0;
+
+				courses.push(new_crn);
+				$('#sb-content').append(dom_string);
+			}
+
+
+			$( document ).ready(function(){
+
+				var mySlidebars = new $.slidebars();
+				$('#menuicon').on('click', function() {
+					console.log('toggle sidebar');
+					mySlidebars.toggle('right');
+
+					if(slidebar_expanded)
+						$('#sb-site').css({'transform': ''});
+
+					slidebar_expanded = !slidebar_expanded;
+					return false;
+				});
+
+
+				$("form#choices").on('submit', function(event) {
+					//event.preventDefault();
+					//getElementById("courses_headdiv").innerHTML="";
+					document.getElementById('courses_head').innerHTML="";
+					document.getElementById('courses').innerHTML="";
+					//$('courses_head').html('');
+					//$('courses').html('');
+					//getElementById("courses").deleteRow(0);
+
+					//$('#courses_head').replaceWith("";
+
+					var department = $("#department").val()
+					var attribute = $("#attribute").val()
+
+					var payload = {department: department, attribute: attribute}
+					console.log("CREATE");
+					var avg;
+					var easiness;
+					var avg_class;
+					var easiness_class;
+					var open_class;
+					var line_class;
+
+					$('#courses_head').append('<tr style=\"background-color:#999999; color:white; width:100%; margin:0px; padding:0; font-size:.8em\"><td style=\"width: 45px\">CRN</td><td style=\"width: 110px\">ID</td><td style=\"width: 140px\">GER</td><td style=\"width: 24%\">COURSE NAME</td><td>INSTRUCTOR</td><td style=\"width:30px\">QUAL.</td><td style=\"width:30px\">EASY</td><td style=\"width: 40px; padding: 0px; text-align:center\">CREDITS</td><td style=\"width: 45px; text-align:center\">DAY</td><td style=\"width: 125px\">TIME</td><td style=\"width: 10px\">SPOTS</td></tr>');
+					$.ajax({
+						url:"/course_search",
+						type: "GET",
+						data: payload,
+						dataType: "json",
+						success: function (data){
+						
+							table = data;
+							for(var i in data){
+								avg = parseFloat(data[i]["AVG_RATING"]);
+								easiness = parseFloat(data[i]["EASINESS"]);
+								console.log(avg);
+								if(data[i]["STATUS"] == "CLOSED"){
+									open_class = "closed";
+								}
+								else {
+									open_class = "open";
+								}
+								if(i%2 == 0){
+									line_class = "line1";
+								}
+								else {
+									line_class = "line2";
+								}
+								if(avg < 2.5){
+									avg_class = "bad";
+								}
+								else if(avg < 3.5){
+									avg_class = "okay";
+								}
+								else if(avg <= 5){
+									avg_class = "good";
+								}
+								else {
+									avg_class = "none";
+								}
+								if(easiness < 2.5){
+									easiness_class = "bad";
+								}
+								else if(easiness < 3.5){
+									easiness_class = "okay";
+								}
+								else if(easiness <= 5){
+									easiness_class = "good";
+								}
+								else {
+									easiness_class = "none";
+								}
+								if (data[i]["INSTRUCTOR"]=="STAFF"){
+									avg_class = "none";
+									easiness_class = "none";
+									data[i]["AVG_RATING"] = "";
+									data[i]["EASINESS"] = "";
+								}
+								$('#courses').append('<tr id="'+ i + '" class="'+line_class+'"><td style="width: 80px"><img class="add_icon" src="./images/add_icon.png" onclick="addCourse('+i+')"><label>' + data[i]["CRN"]+ '</label></td><td style="width: 110px">' + data[i]["ATTRIBUTE"]+ '</td><td style="width: 120px">' + data[i]["COURSE_ID"]+ '</td><td>' + data[i]["TITLE"]+ '<a onclick="getDescription(' + i + ')"> + </a></td><td>' + data[i]["INSTRUCTOR"]+  '</td><td class="'+avg_class+'">' + data[i]["AVG_RATING"]+ '</td><td class="'+easiness_class+'">' + data[i]["EASINESS"]+ '</td><td style="width: 30px; text-align:center">' + data[i]["CREDIT_HOURS"]+ '</td><td style="width: 30px; text-align:center">' + data[i]["DAYS"]+ '</td><td style="width: 130px">' + data[i]["TIMES"]+ '</td><td class= "'+open_class+'" >' + data[i]["AVAILABLE"]+ '</td></tr>');
+							}
+
+							return false;
+						}
+					});
+
+					return false;
+				});
+			});
+	
+		</script>
+	</head>
+
+	<body>
+		
+		<div class="headerbox"><br><br>
+			<img class="facebook" style="left:15px" src="/images/fb_icon.png">
+			<img class="facebook" style="left:55px"src="/images/fb_like.png">
+			<img class="facebook" id="menuicon" src="/images/menu.png"><br>
+			<img class="logo" src="/images/Logo.png"><br><br><br>
+		</div>
+		
+		<div class="select">
+			<form id="choices" action="" method="GET">
+				<!---action = "/" -->
+				<h1>DEPARTMENT:
+				<select name="department" id="department">
+					<option value="0">ALL</option>
+					<option value="AFST">Africana Studies</option>
+					<option value="AMST">American Studies</option>
+					<option value="ANTH">Anthropology</option>
+					<option value="APSC">Applied Science</option>
+					<option value="ARAB">Arabic</option>
+					<option value="ART">Art</option>
+					<option value="ARTH">Art History</option>
+					<option value="AMES">Asian &amp; Middle Eastern Studies</option>
+					<option value="BIOL">Biology</option>
+					<option value="BUAD">Business Administration</option>
+					<option value="CHEM">Chemistry</option>
+					<option value="CHIN">Chinese</option>
+					<option value="CLCV">Classical Civilization</option>
+					<option value="COLL">College Courses</option>
+					<option value="CMST">Community Studies</option>
+					<option value="CSCI">Computer Science</option>
+					<option value="CRWR">Creative Writing</option>
+					<option value="CRIN">Curriculum &amp; Instruction</option>
+					<option value="DANC">Dance</option>
+					<option value="ECON">Economics</option>
+					<option value="EPPL">Ed Policy Planning Leadership</option>
+					<option value="EDUC">Education</option>
+					<option value="ENGL">English</option>
+					<option value="ENSP">Environmental Science &amp; Policy</option>
+					<option value="EURS">European Studies</option>
+					<option value="FMST">Film and Media Studies</option>
+					<option value="FILM">Film Studies</option>
+					<option value="FREN">French &amp; Francophone Studies</option>
+					<option value="GSWS">Gender/Sexuality &amp; Women's Std</option>
+					<option value="GIS">Geographic Information Systems</option>
+					<option value="GEOL">Geology</option>
+					<option value="GRMN">German Studies</option>
+					<option value="GBST">Global Studies</option>
+					<option value="GOVT">Government</option>
+					<option value="GRAD">Graduate</option>
+					<option value="GREK">Greek</option>
+					<option value="HBRW">Hebrew</option>
+					<option value="HISP">Hispanic Studies</option>
+					<option value="HIST">History</option>
+					<option value="INTR">Interdisciplinary Studies</option>
+					<option value="INRL">International Relations</option>
+					<option value="ITAL">Italian</option>
+					<option value="JAPN">Japanese</option>
+					<option value="KINE">Kinesiology &amp; Hlth Sciences</option>
+					<option value="LATN">Latin</option>
+					<option value="LAS">Latin American Studies</option>
+					<option value="LAW">Law</option>
+					<option value="LING">Linguistics</option>
+					<option value="LCST">Literary &amp; Cultural Studies</option>
+					<option value="MSCI">Marine Science</option>
+					<option value="MATH">Mathematics</option>
+					<option value="MREN">Medieval &amp; Renaissance Studies</option>
+					<option value="MLSC">Military Science</option>
+					<option value="MDLL">Modern Languages/Literatures</option>
+					<option value="MUSC">Music</option>
+					<option value="NSCI">Neuroscience</option>
+					<option value="PHIL">Philosophy</option>
+					<option value="PHYS">Physics</option>
+					<option value="PSYC">Psychology</option>
+					<option value="PBHL">Public Health</option>
+					<option value="PUBP">Public Policy</option>
+					<option value="RELG">Religious Studies</option>
+					<option value="RUSN">Russian</option>
+					<option value="RPSS">Russian &amp; Post-Soviet Studies</option>
+					<option value="SOCL">Sociology</option>
+					<option value="SPCH">Speech</option>
+					<option value="THEA">Theatre</option>
+					<option value="WRIT">Writing</option>
+				</select>
+				<WBR>GER:
+				<select name="attribute" id="attribute">
+					<option value="0">ALL</option>
+					<option value="GE1">GER1Math/Quantitative Reasoning</option>
+					<option value="G2LA">GER2LA Natural Sci-Physical Lab</option>
+					<option value="GE2L">GER2LB Natural Sci-Bio Lab</option>
+					<option value="GE2A">GER2A Natural Sci-Physical</option>
+					<option value="GE2B">GER2B Natural Sci-Biological</option>
+					
+					<option value="GE3">GER3 Social Sciences</option>
+					<option value="GE4A">GER4A Hist/Cultr Euro Tradition</option>
+					<option value="GE4B">GER4B Hist/Cult outside EurTrad </option>
+					<option value="GE4C">GER4C Cross-Cultural Issues</option>
+					<option value="GE5">GER5 Lit/Hist of the Arts</option>
+					<option value="GE6">GER6 Creative &amp; Performing Arts</option>
+					<option value="GE7">GER7 Phil/Relig/Soc Thought</option>
+					<option value="FLP">Foreign Lang Proficiency</option>
+					<option value="FRSM">Freshmen Seminar Req</option>
+				</select>
+				&nbsp;&nbsp;&nbsp;<WBR>
+				<input type="submit" class="submit" text="SUBMIT" />				
+			</form>
+		</div>
+		<div style="overflow:auto">
+			<table class="courses_head" id="courses_head"></table>
+			<table id="courses"></table>
+		</div>
+
+
+		<div class="sb-slidebar sb-right" id="sb-content">
+			<h1>SELECTED COURSES:</h1>
+<!-- 			<div class="courseRect"> 10056 - CHEM 103 01<br> <strong>General Chemistry I</strong><br>Rice, Gary<br>MWF	11:00AM-11:50AM </div>
+
+			<div class="courseRect" style="background-color: #758cff"> 12666 - CSCI 544 01<br> <strong>Operating Systems</strong><br>Kearns, John<br>TR 9:30AM-10:50AM </div>
+
+			<div class="courseRect" style="background-color: #c8ff8d"> 12666 - CSCI 544 01<br> <strong>Operating Systems</strong><br>Kearns, John<br>TR 9:30AM-10:50AM </div>
+			
+			<div class="courseRect" style="background-color: #ff9e57"> 12666 - CSCI 544 01<br> <strong>Operating Systems</strong><br>Kearns, John<br>TR 9:30AM-10:50AM </div> -->
+		</div>
+	</body>
+</html>
